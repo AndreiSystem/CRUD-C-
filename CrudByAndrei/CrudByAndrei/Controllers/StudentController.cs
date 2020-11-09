@@ -1,4 +1,5 @@
 ﻿using CrudByAndrei.Models;
+using MongoDB.Bson;
 using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
@@ -25,9 +26,16 @@ namespace CrudByAndrei.Controllers
         }
 
         // GET: Student/Details/5
-        public ActionResult Details(int id)
+        public ActionResult Details(string id)
         {
-            return View();
+            MongoHelper.ConnectToMongoService();
+            MongoHelper.student_collection =
+                MongoHelper.database.GetCollection<Student>("students");
+            
+            var filter = Builders<Student>.Filter.Eq("_id", ObjectId.Parse(id));
+            var result = MongoHelper.student_collection.Find(filter).FirstOrDefault();
+
+            return View(result);
         }
 
         // GET: Student/Create
@@ -71,18 +79,36 @@ namespace CrudByAndrei.Controllers
         }
 
         // GET: Student/Edit/5
-        public ActionResult Edit(int id)
+        public ActionResult Edit(string id)
         {
-            return View();
+            MongoHelper.ConnectToMongoService();
+            MongoHelper.student_collection =
+                MongoHelper.database.GetCollection<Student>("students");
+
+            var filter = Builders<Student>.Filter.Eq("_id", ObjectId.Parse(id));
+            var result = MongoHelper.student_collection.Find(filter).FirstOrDefault();
+
+            return View(result);
         }
 
         // POST: Student/Edit/5
         [HttpPost]
-        public ActionResult Edit(int id, FormCollection collection)
+        public ActionResult Edit(string id, FormCollection collection)
         {
             try
             {
-                // TODO: Add update logic here
+                MongoHelper.ConnectToMongoService();
+                MongoHelper.student_collection =
+                    MongoHelper.database.GetCollection<Student>("students");
+
+                var filter = Builders<Student>.Filter.Eq("_id", ObjectId.Parse(id));
+
+                var update = Builders<Student>.Update
+                    .Set("firstName", collection["firstName"])
+                    .Set("lastName", collection["lastName"])
+                    .Set("emailAddress", collection["emailAddress"]);
+
+                var result = MongoHelper.student_collection.UpdateOneAsync(filter, update);
 
                 return RedirectToAction("Index");
             }
