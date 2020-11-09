@@ -119,18 +119,32 @@ namespace CrudByAndrei.Controllers
         }
 
         // GET: Student/Delete/5
-        public ActionResult Delete(int id)
+        public ActionResult Delete(string id)
         {
-            return View();
+            MongoHelper.ConnectToMongoService();
+            MongoHelper.student_collection =
+                MongoHelper.database.GetCollection<Student>("students");
+
+            var filter = Builders<Student>.Filter.Eq("_id", ObjectId.Parse(id));
+            var result = MongoHelper.student_collection.Find(filter).FirstOrDefault();
+
+            return View(result);
         }
 
         // POST: Student/Delete/5
         [HttpPost]
-        public ActionResult Delete(int id, FormCollection collection)
+        public ActionResult Delete(string id, FormCollection collection)
         {
             try
             {
-                // TODO: Add delete logic here
+                MongoHelper.ConnectToMongoService();
+                MongoHelper.student_collection =
+                    MongoHelper.database.GetCollection<Student>("students");
+
+                var filter = Builders<Student>.Filter.Eq("_id", ObjectId.Parse(id));
+
+                var result = MongoHelper.student_collection.DeleteOneAsync(filter);
+
 
                 return RedirectToAction("Index");
             }
