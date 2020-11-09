@@ -1,4 +1,5 @@
 ﻿using CrudByAndrei.Models;
+using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,7 +14,14 @@ namespace CrudByAndrei.Controllers
         // GET: Student
         public ActionResult Index()
         {
-            return View();
+            MongoHelper.ConnectToMongoService();
+            MongoHelper.student_collection =
+                MongoHelper.database.GetCollection<Student>("students");
+
+            var filter = Builders<Student>.Filter.Ne("_id","");
+            var result = Models.MongoHelper.student_collection.Find(filter).ToList();
+
+            return View(result);
         }
 
         // GET: Student/Details/5
@@ -34,7 +42,6 @@ namespace CrudByAndrei.Controllers
         {
             try
             {
-                // TODO: Add insert logic here
                 MongoHelper.ConnectToMongoService();
                 MongoHelper.student_collection =
                     MongoHelper.database.GetCollection<Student>("students");
